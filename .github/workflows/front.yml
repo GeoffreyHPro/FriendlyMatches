@@ -1,0 +1,45 @@
+name: Angular CI Pipeline
+
+# Cet événement déclenche l'action sur chaque push et pull request pour toutes les branches
+on:
+  push:
+    branches:
+      - '*'  # Toutes les branches
+  pull_request:
+    branches:
+      - '*'  # Toutes les branches
+
+jobs:
+  build:
+    runs-on: ubuntu-latest  # Utilisation d'un environnement Ubuntu
+
+    strategy:
+      matrix:
+        node-version: [16.x]  # Version de Node.js compatible avec Angular
+
+    steps:
+      # Étape 1: Cloner le dépôt
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      # Étape 2: Configurer la version de Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      # Étape 3: Installer les dépendances
+      - name: Install dependencies
+        run: npm ci  # 'npm ci' est recommandé pour CI car il installe plus rapidement les dépendances
+
+      # Étape 4: Construire l'application Angular
+      - name: Build Angular app
+        run: npm run build --if-present  # Commande pour construire le projet Angular (en option)
+
+      # Étape 5: Lancer les tests unitaires
+      - name: Run unit tests
+        run: npm test -- --watch=false --browsers=ChromeHeadless  # Lancer les tests avec Chrome en mode headless
+
+      # Étape 6: Optionnel - Lancer les tests de linting
+      - name: Lint code
+        run: npm run lint
